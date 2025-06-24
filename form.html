@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <style>
+    input,
+    textarea {
+      display: block;
+      margin: 10px 0;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 16px;
+
+    }
+
+    body {
+      background-color: #e0ebfe;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    img {
+      width: 100px;
+    }
+
+    #title {
+      font-size: 36px;
+    }
+
+    #intro {
+      font-size: 16px;
+    }
+  </style>
+</head>
+
+<body>
+  <img id="pisaychatlogo" src="https://i.ibb.co/FkwvKFNf/Pisay-Chat-modern-logo-1.png" alt="PisayChat">
+  <span id="title">PisayChat: Chat with anyone in Pisay!</span>
+
+  <br>
+  <br>
+  <span id="intro">
+    <div>Welcome to PisayChat!</div>
+    <br>
+    <div>Stuff you should know</div>
+    <ol>
+      <li>Hate speech/bullying, especially those mentioning names will not be posted. Instead, something else will appear.
+      </li>
+      <li>I/the admins won't be held accountable with your words and actions</li>
+      <li>Use trigger warning when posting rants</li>
+      <li>pls expect your submissions to be posted within 24 hours (faster than Pisay Gforms/everyone else)</li>
+      <li>Emails of submissions are not recorded (can't trace original poster)</li>
+      <li>[emphasizing 3] minimum post time: 1 minute | guaranteed post time: 24 hours</li>
+      <li>You may promote anything here as long as it is from Pisay.</li>
+    </ol>
+    <div>For the latest posts: <a href="https://facebook.com/PisayChat">PisayChat FB page</a></div>
+    <div>For takedown requests/inquiries, send a DM here: <a href="https://www.facebook.com/messages/t/456408750892524/">DM to PisayChat.</a></div>
+    <div>If there are issues in this page, you may go here: <a href="https://docs.google.com/forms/d/e/1FAIpQLSfamDRVJ8TjffFsNCffwO6nHl31Uw3nfTxL-3Ph3xRoyvX7tA/viewform">PisayChat google form</a></div>
+    <br>
+    <div>-princekyleaedam</div>
+	</span>
+  <br>
+
+  <form id="uploadForm">
+    <span>campus, batch</span>
+    <input type="text" name="campus" id="campus" placeholder="cvisc '25">
+    <span>Type your submission here: [required]</span>
+    <textarea name="message" id="message" rows="10" cols="100" placeholder="Enter message here" required></textarea>
+    <span>codename (anything)</span>
+    <input type="text" name="codename" id="codename" placeholder="princekyleaedam">
+    <span>Images/Video: (Encouraged, but optional)</span>
+    <input type="file" id="fileInput" name="files" multiple />
+    <button id="submit-btn" class="poppins" type="submit">Submit</button>
+  </form>
+  <div id="output"></div>
+
+  <script>
+    document.getElementById("uploadForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+
+        const message = document.getElementById("message").value;
+        const files = document.getElementById("fileInput").files;
+        const campus = document.getElementById("campus").value;
+        const codename = document.getElementById("codename").value;
+        
+
+        if (files.length === 0) {
+          // No files: submit text only
+          google.script.run
+            .withSuccessHandler(function (msg) {
+              document.getElementById("output").innerText = msg;
+              document.getElementById("uploadForm").reset();
+            })
+            .uploadData(campus, message, codename, []); // empty file array
+        } else {
+          // Files present: read and upload
+          const fileDataArray = [];
+          let filesProcessed = 0;
+
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+
+            reader.onloadend = function () {
+              const content = reader.result.split(",")[1];
+              fileDataArray.push({
+                filename: file.name,
+                mimeType: file.type,
+                data: content
+              });
+
+              filesProcessed++;
+              if (filesProcessed === files.length) {
+                google.script.run
+                  .withSuccessHandler(function (msg) {
+                    document.getElementById("message").innerText = msg;
+                    document.getElementById("uploadForm").reset();
+                  })
+                  .uploadData(campus, message, codename, fileDataArray);
+              }
+            };
+
+            reader.readAsDataURL(file);
+          }
+        }
+      });
+  </script>
+</body>
+
+</html>
